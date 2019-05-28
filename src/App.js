@@ -49,10 +49,12 @@ class App extends Component {
 
   renderSquare(i) {
     const className = (this.state.squares[i] == null) ? "square" :
-      (this.state.winner != null && this.state.winner === this.state.squares[i]) ?
+      (this.state.winner != null && 
+        this.state.winner === this.state.squares[i]) &&
+        this.state.winningLine.includes(i) ?
         "square-winner" : "square-full";
     const enabled = (this.state.winner == null && this.state.squares[i] == null) ? true : false;
-    const eventHandler = (enabled) ? this.handleClick : "";
+    const eventHandler = (enabled) ? this.handleClick : () => {};
     const output = (
       <div className={className} id={i}
         onClick={eventHandler}>
@@ -62,14 +64,33 @@ class App extends Component {
     return output;
   }
 
-  handleClick(event) {
-    /*
-    this.squares[i] = this.xIsNext ? 'X' : 'O';
-    this.calculateWinner();
-    this.xIsNext = !(this.xIsNext); 
-    this.render();
-    */
-   console.log(event.target);
+  handleClick(event) {    
+    console.log(event.target);
+    const i = event.target.id;
+    let squares = Object.assign({}, this.state.squares);
+    squares[i] = this.state.xIsNext ? 'X' : 'O';
+    const theWinner = this.calculateWinner(squares);
+    this.setState({
+      squares: squares,
+      xIsNext: !this.state.xIsNext,
+      winner: theWinner.player,
+      winningLine: theWinner.winningLine
+    });  
+  }
+
+  calculateWinner(squares) {
+    for (let i = 0; i < this.lines.length; i++) {
+        const [a, b, c] = this.lines[i];       
+        if (squares[a] && 
+        squares[a] === squares[b] && 
+        squares[a] === squares[c]) {            
+            return {player: squares[a],
+                    winningLine: this.lines[i]};
+        }
+    }
+
+    return {player: null,
+            winningLine: []};
   }
 }
 
